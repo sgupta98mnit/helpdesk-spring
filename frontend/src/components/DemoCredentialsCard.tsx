@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Card } from "@/components/ui/card";
+import { API_BASE } from "@/lib/api";
 
 type DemoCredentials = {
   tenantSlug: string;
@@ -13,7 +14,7 @@ export default function DemoCredentialsCard() {
   const [data, setData] = useState<DemoCredentials | null>(null);
 
   useEffect(() => {
-    fetch("http://localhost:8080/public/demo-credentials")
+    fetch(`${API_BASE}/public/demo-credentials`)
       .then((res) => (res.ok ? res.json() : null))
       .then((payload) => {
         if (payload && payload.tenantSlug) {
