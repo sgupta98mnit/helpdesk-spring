@@ -1,7 +1,8 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  basePath: '/projects/helpdesk-spring'
+  basePath: '/projects/helpdesk-spring',
+  trailingSlash: true,
 };
 
 module.exports = nextConfig;
