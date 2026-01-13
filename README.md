@@ -95,3 +95,56 @@ mvn test
 cd frontend
 npm run test:e2e
 ```
+
+## VPS Deployment
+
+This project is configured for deployment on a Virtual Private Server (VPS) using Docker and Docker Compose.
+
+### Prerequisites on your VPS
+
+*   **Docker and Docker Compose:** Install Docker and Docker Compose.
+*   **Nginx:** Install Nginx to act as a reverse proxy.
+
+### Deployment Steps
+
+1.  **Clone the repository:**
+    ```bash
+    git clone https://github.com/sgupta98mnit/helpdesk-spring.git
+    cd helpdesk-spring
+    ```
+
+2.  **Configure Environment Variables:**
+    *   A `.env` file has been created for you. You **must** update the placeholder values in this file for production.
+    *   **`APP_SECURITY_JWT_SECRET`**: A strong, unique secret for signing JWTs. You can generate one with `openssl rand -hex 32`.
+    *   **`APP_SECURITY_PLATFORM_ADMIN_KEY`**: A secret key to protect the tenant creation endpoint.
+    *   **`NEXT_PUBLIC_API_BASE_URL`**: The full public URL to your backend API. This has been pre-configured to `http://sumit-gupta.cloud/projects/helpdesk-spring/api` but you should verify it matches your setup.
+
+3.  **Configure the Reverse Proxy (Nginx):**
+    *   A sample Nginx configuration is provided in `nginx.conf.example`.
+    *   Copy or link this configuration to your Nginx configuration directory (e.g., `/etc/nginx/sites-available/`).
+    *   Make sure to update `server_name` to your domain (`sumit-gupta.cloud`).
+    *   Enable the site and restart Nginx.
+
+    Example for Ubuntu:
+    ```bash
+    sudo cp nginx.conf.example /etc/nginx/sites-available/helpdesk
+    sudo ln -s /etc/nginx/sites-available/helpdesk /etc/nginx/sites-enabled/
+    sudo nginx -t # Test configuration
+    sudo systemctl restart nginx
+    ```
+
+4.  **Build and Run the Application:**
+    *   Use Docker Compose to build and run all the services in detached mode:
+    ```bash
+    docker-compose up --build -d
+    ```
+
+5.  **Accessing your Application:**
+    *   **Frontend:** `http://sumit-gupta.cloud/projects/helpdesk-spring`
+    *   **Backend API:** `http://sumit-gupta.cloud/projects/helpdesk-spring/api`
+
+### Port Configuration
+
+*   The backend service is configured to run on port `8081` to avoid conflicts.
+*   The frontend service is configured to run on port `3001`.
+*   Nginx listens on port `80` and proxies requests to the appropriate services based on the URL path.

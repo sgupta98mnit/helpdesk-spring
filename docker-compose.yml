@@ -1,10 +1,11 @@
 services:
   postgres:
     image: postgres:15-alpine
+    env_file: .env
     environment:
-      POSTGRES_DB: helpdesk
-      POSTGRES_USER: helpdesk
-      POSTGRES_PASSWORD: helpdesk
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     ports:
       - "5432:5432"
     volumes:
@@ -39,9 +40,10 @@ services:
   minio:
     image: minio/minio:latest
     command: server /data --console-address ":9001"
+    env_file: .env
     environment:
-      MINIO_ROOT_USER: minioadmin
-      MINIO_ROOT_PASSWORD: minioadmin
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
     ports:
       - "9000:9000"
       - "9001:9001"
@@ -52,9 +54,10 @@ services:
     image: minio/mc:latest
     depends_on:
       - minio
+    env_file: .env
     entrypoint: ["/bin/sh", "-c"]
     command: |
-      "sleep 5; mc alias set local http://minio:9000 minioadmin minioadmin; mc mb -p local/helpdesk-attachments;"
+      "sleep 5; mc alias set local http://minio:9000 ${MINIO_ROOT_USER} ${MINIO_ROOT_PASSWORD}; mc mb -p local/helpdesk-attachments;"
 
   jaeger:
     image: jaegertracing/all-in-one:1.57
@@ -76,18 +79,21 @@ services:
 
   backend:
     build: .
+    env_file: .env
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/helpdesk
-      SPRING_DATASOURCE_USERNAME: helpdesk
-      SPRING_DATASOURCE_PASSWORD: helpdesk
+      SERVER_PORT: 8081
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB}
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
       SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
       SPRING_DATA_REDIS_HOST: redis
       APP_S3_ENDPOINT: http://minio:9000
       OTEL_EXPORTER_OTLP_ENDPOINT: http://jaeger:4318/v1/traces
       OTEL_EXPORTER_OTLP_PROTOCOL: http/protobuf
+      APP_SECURITY_JWT_SECRET: ${APP_SECURITY_JWT_SECRET}
       APP_SECURITY_PLATFORM_ADMIN_KEY: ${APP_SECURITY_PLATFORM_ADMIN_KEY}
     ports:
-      - "8080:8080"
+      - "8081:8081"
     depends_on:
       - postgres
       - redis
@@ -97,10 +103,11 @@ services:
 
   frontend:
     build: ./frontend
+    env_file: .env
     environment:
-      NEXT_PUBLIC_API_BASE_URL: http://localhost:8080
+      NEXT_PUBLIC_API_BASE_URL: ${NEXT_PUBLIC_API_BASE_URL}
     ports:
-      - "3000:3000"
+      - "3001:3000"
     depends_on:
       - backend
 
