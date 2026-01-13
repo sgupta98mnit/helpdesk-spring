@@ -1,6 +1,6 @@
 /** @type {import('next').NextConfig} */
-const nextConfig = {
+module.exports = {
   reactStrictMode: true,
+  basePath: "/projects/helpdesk",
+  trailingSlash: false,
 };
-
-module.exports = nextConfig;
