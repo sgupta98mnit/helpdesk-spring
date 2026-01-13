@@ -1,0 +1,66 @@
+spring:
+  application:
+    name: helpdesk
+  datasource:
+    url: jdbc:postgresql://localhost:5432/helpdesk
+    username: helpdesk
+    password: helpdesk
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        format_sql: true
+        default_schema: public
+  flyway:
+    enabled: true
+  kafka:
+    bootstrap-servers: localhost:9092
+  data:
+    redis:
+      host: localhost
+      port: 6379
+  cache:
+    type: redis
+
+server:
+  port: 8080
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus
+  tracing:
+    sampling:
+      probability: 1.0
+  otlp:
+    tracing:
+      endpoint: ${OTEL_EXPORTER_OTLP_ENDPOINT:http://localhost:4317}
+
+info:
+  app:
+    name: helpdesk
+    description: Multi-tenant Helpdesk + Knowledge Base
+    version: 0.0.1-SNAPSHOT
+
+app:
+  security:
+    jwt:
+      issuer: helpdesk
+      access-token-ttl-minutes: 15
+      refresh-token-ttl-days: 7
+      secret: change-this-secret-in-prod-change-this-secret
+    platform-admin-key: ""
+  tenant:
+    header: X-Tenant-Id
+  s3:
+    endpoint: http://localhost:9000
+    region: us-east-1
+    access-key: minioadmin
+    secret-key: minioadmin
+    bucket: helpdesk-attachments
+  outbox:
+    poll-interval-ms: 2000
+  rate-limit:
+    requests-per-minute: 120
